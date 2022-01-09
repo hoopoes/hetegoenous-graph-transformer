@@ -10,10 +10,11 @@ from utils import *
 path = os.path.join(os.getcwd(), 'data/DBLP')
 dataset = DBLP(path)
 data = dataset[0]
-print(data)
 
 # We initialize conference node features with a single feature.
 data['conference'].x = torch.ones(data['conference'].num_nodes, 1)
+
+print(data)
 
 
 class HGT(torch.nn.Module):
@@ -39,6 +40,10 @@ class HGT(torch.nn.Module):
         for conv in self.convs:
             x_dict = conv(x_dict, edge_index_dict)
 
+        # self.lin(x_dict['author'])
+        # self.lin(x_dict['paper'])
+        # -> these represent hgt embedding
+
         return self.lin(x_dict['author'])
 
 
@@ -50,6 +55,13 @@ with torch.no_grad():  # Initialize lazy modules.
     out = model(data.x_dict, data.edge_index_dict)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.005, weight_decay=0.001)
+
+# data.edge_index_dict.keys() -> metapath 별 edge_index
+# data.edge_index_dict[('author', 'to', 'paper')].shape -> (2, 19645)
+
+# data.x_dict.keys() -> 각 node 별 embedding 저장
+# data.x_dict['author'] -> (4057, 334)
+# data.x_dict['paper'] -> (14328, 4231)
 
 
 def train():
